@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=62.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name        = "paperscope_simulation"
+version     = "0.1.0"
+license     = {text = "GNU General Public License v3.0"}
+readme      = "README.md"
+authors     = [
+    {name = "Hello Nasty GmbH", email="hello@hello-nasty.com"},
+]
+requires-python = ">=3.8.0"
+dependencies = [
+    "supy==2025.2.18.dev0",
+    "jaydebeapi",
+    "geopandas",
+    "netCDF4",
+    "numba",
+    "target-py",
+    "aiohttp",
+    "aiofiles",
+    "scikit-learn",
+    "rioxarray",
+    "opencv-python-headless"
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy==1.14.0",
+]
+
+[project.urls]
+"Source Code" = "TODO"
+
+[tool.setuptools]
+platforms = ["any"]
+zip-safe  = true
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["paperscope_simulation"]
+exclude = ["tests", ".devcontainer"]
+namespaces = false

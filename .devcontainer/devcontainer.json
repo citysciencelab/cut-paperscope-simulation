@@ -1,0 +1,20 @@
+{
+    "name": "QGIS Dev Container",
+    "dockerComposeFile": "../docker-compose.yml",
+    "service": "simulation",
+    "workspaceFolder": "/app",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.pythonPath": "/usr/share/python3",
+                "extensions": [
+                    "ms-python.python",
+                    "ms-azuretools.vscode-docker"
+                ]
+            }
+        }
+    },
+    "postCreateCommand": "rm -f gis-data && ln -s /usr/share/gis-data gis-data && pip install -e .[dev]",
+    "remoteUser": "root",
+    "overrideCommand": true
+}

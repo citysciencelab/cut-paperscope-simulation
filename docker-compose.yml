@@ -1,0 +1,9 @@
+services:
+  simulation:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: no
+    volumes:
+      - .:/app
