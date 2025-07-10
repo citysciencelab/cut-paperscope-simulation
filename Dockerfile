@@ -48,13 +48,16 @@ RUN unzip bodenbedeckung.zip && rm bodenbedeckung.zip
 WORKDIR /usr/share/gis-data
 ADD https://develop.hello-nasty.com/hcu/paperscope-prod/storage/downloads/hh_lod2_buildings.zip buildings.zip
 RUN unzip buildings.zip && rm buildings.zip
-    
-# Install Python dependencies
-WORKDIR /app
-ADD pyproject.toml pyproject.toml
-RUN python3 -m pip config set global.break-system-packages true
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip3 install -e .
 
+# virtual env with access to system packages
+RUN python3 -m venv --system-site-packages /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# copy project files
+WORKDIR /app
 COPY . /app
 COPY ./data/dgm1_hh_2022.vrt /usr/share/gis-data/dgm1_hh_2022-04-30/dgm1_hh_2022/dgm1_hh_2022.vrt
+
+# install project dependencies
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip3 install --ignore-installed -e .

@@ -12,6 +12,9 @@ authors     = [
 ]
 requires-python = ">=3.8.0"
 dependencies = [
+    "numpy<2.0",
+    "pytz",
+    "tzdata",
     "supy==2025.2.18.dev0",
     "jaydebeapi",
     "geopandas",
@@ -21,8 +24,7 @@ dependencies = [
     "aiohttp",
     "aiofiles",
     "scikit-learn",
-    "rioxarray",
-    "opencv-python-headless"
+    "rioxarray"
 ]
 
 [project.optional-dependencies]
