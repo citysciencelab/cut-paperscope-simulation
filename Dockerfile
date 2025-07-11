@@ -41,12 +41,12 @@ RUN unzip dgm1_hh_2022.zip && rm dgm1_hh_2022.zip
 
 # install LGV Bodenbedeckung
 WORKDIR /usr/share/gis-data
-ADD https://develop.hello-nasty.com/hcu/paperscope-prod/storage/downloads/bodenbedeckung.zip bodenbedeckung.zip
+ADD https://paperscope.comodeling.city/storage/downloads/bodenbedeckung.zip bodenbedeckung.zip
 RUN unzip bodenbedeckung.zip && rm bodenbedeckung.zip
 
 # install LOD2 Buildings
 WORKDIR /usr/share/gis-data
-ADD https://develop.hello-nasty.com/hcu/paperscope-prod/storage/downloads/hh_lod2_buildings.zip buildings.zip
+ADD https://paperscope.comodeling.city/storage/downloads/hh_lod2_buildings.zip buildings.zip
 RUN unzip buildings.zip && rm buildings.zip
 
 # virtual env with access to system packages
