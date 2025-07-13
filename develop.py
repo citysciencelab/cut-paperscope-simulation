@@ -7,18 +7,13 @@
 
 import os
 import sys
+import time
 
-# qgis
-from qgis.core import *
-from qgis.gui import  QgsMapCanvas
-QgsApplication.setPrefixPath("/usr", True)
-
-from PyQt5.QtCore import QVariant
-
-# umep
-import processing 
-from processing.core.Processing import Processing
-from processing_umep.processing_umep_provider import ProcessingUMEPProvider
+# paperscope
+from paperscope_simulation.qgis import Qgis
+from paperscope_simulation.umep import Umep
+from paperscope_simulation.paperscope import PaperScope
+from paperscope_simulation.layer import Layer
 
 
 
@@ -28,30 +23,63 @@ from processing_umep.processing_umep_provider import ProcessingUMEPProvider
 #
 #///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-def initQgis() -> QgsApplication:
-
-    global qgsApp
-    global umep
-
-    # create QGIS application
-    qgsApp = QgsApplication([], False)
-    QgsApplication.initQgis()
-    Processing.initialize()
-
-    # add umep plugin to qgis
-    umep = ProcessingUMEPProvider()
-    QgsApplication.processingRegistry().addProvider(umep)
-
 
 def main():
+    
+    Qgis.init()
+
+    simulationId = "9f5727cc-5ab2-4bff-9354-e6934a09a61f"
+    baseUrl = "https://develop.hello-nasty.com/hcu/paperscope-prod/"
+    gridSize = 5
 
     # clear console
     print("\033[H\033[J")
     print("QGIS UMEP Test")
     print("=====================================")
 
-    controller = SimulationController()
-    controller.run("9f2fd11f-450b-4a2f-b7d0-49171b70bbb6")    
+    # init paperscope
+    PaperScope.baseUrl = baseUrl
+    simulation, project = PaperScope.load(simulationId)
+    
+    # init components
+    Layer.basePath = f"/app/storage/{simulation['id']}/"
+    Layer.gridSize = gridSize
+    Umep.init(Layer.basePath, Layer.gridSize)
+
+    # create default layer
+    initPerformanceInfo()
+    
+    Layer.createAreaLayer(project)
+    addPerformanceInfo("area")
+    Layer.createGridLayer()
+    addPerformanceInfo("grid")
+    Layer.createDEMLayer()
+    addPerformanceInfo("dem")
+    Layer.createPaperScopeLayer(project)
+    addPerformanceInfo("paperscope")
+    Layer.createDSMLayer()
+    addPerformanceInfo("dsm")
+    Layer.createLandCoverLayer()
+    addPerformanceInfo("landcover")
+    Layer.classifyLandCover()
+    addPerformanceInfo("landcover_classified")
+
+    # UMEP heatmap
+    if simulation["model"] == "umep:heat_island":
+        Umep.createMorphometricParameters()
+        addPerformanceInfo("morphometric")
+        Umep.createLandCoverFraction()
+        addPerformanceInfo("landcover_fraction")
+        Umep.prepareHeatmap()
+        addPerformanceInfo("heatmap_prepared")
+        Umep.runHeatmap()
+        addPerformanceInfo("heatmap_run")
+        Umep.analyzeHeatmap()
+        addPerformanceInfo("heatmap_analyzed")
+
+    Qgis.saveProject(Layer.basePath, simulation, project) 
+
+    printPerformanceInfo()
 
 
 
@@ -128,10 +156,64 @@ def createLodBuildings():
 
 
 #///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#
+#	PERFORMANCE
+#
+#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+def initPerformanceInfo():
+
+    global timestamps
+
+    timestamps = [
+        ['start', round(time.time() * 1000)],
+    ]
+
+
+def addPerformanceInfo(label):
+
+    global timestamps
+    timestamps.append([label, round(time.time() * 1000)])
+
+
+def printPerformanceInfo():
+
+    print("Layer performance:")
+    for i in range(1, len(timestamps)):
+        label = timestamps[i][0]
+        start = timestamps[i-1][1]
+        end = timestamps[i][1]
+        diff = end - start
+
+        # format diff
+        if diff >= 60000:
+            diff_str = str(round(diff / 60000, 2)) + " min"
+        elif diff >= 1000:
+            diff_str = str(round(diff / 1000, 2)) + " s"
+        else:
+            diff_str = str(diff) + " ms"
+        print(f"{label}:\t{diff_str}")
+
+    start = timestamps[0][1]
+    end = timestamps[-1][1]
+    diff = end - start
+    
+    # format total diff
+    if diff >= 60000:
+        diff_str = str(round(diff / 60000, 2)) + " min"
+    elif diff >= 1000:
+        diff_str = str(round(diff / 1000, 2)) + " s"
+    else:
+        diff_str = str(diff) + " ms"
+    print(f"all layer:\t{diff_str}")
+
+
+
+#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 if __name__ == '__main__':
     
-    initQgis()
     main()
     #createLodBuildings()

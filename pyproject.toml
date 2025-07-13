@@ -24,7 +24,9 @@ dependencies = [
     "aiohttp",
     "aiofiles",
     "scikit-learn",
-    "rioxarray"
+    "rioxarray",
+    "trimesh",
+    "requests"
 ]
 
 [project.optional-dependencies]

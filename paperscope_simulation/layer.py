@@ -222,18 +222,31 @@ class Layer:
             mapping = PaperScope.getMappingForObject(project, f)
             if not mapping:
                 continue
-            if not mapping["target"] == "shape-3d":
+            if mapping["target"] == "shape-2d":
                 continue
-            
+            if mapping["target"] == "street":
+                continue
+
             # object properties
             id = f["properties"]['uid']
             shape = f["properties"]["shape"]
             height = float(mapping["props"]["height"])
+            umep_type = 2 # building as default
+            
+            # UMEP classification type
+            if mapping["target"] == "greenspace":
+                height = 0.1
+                umep_type = 8 # Low vegetation
 
+            # create points
             points = []
-            for p in f["geometry"]["coordinates"]:
-                point = Helper.convertPoint(p[0], p[1])
-                points.append(point)
+            if mapping["target"] == "model":
+                origin = f["geometry"]["coordinates"][0]
+                points = Helper.glbToPolygon(origin, mapping["props"])
+            else:
+                for p in f["geometry"]["coordinates"]:
+                    point = Helper.convertPoint(p[0], p[1])
+                    points.append(point)
 
             # create polygon geometry
             polygon = QgsGeometry.fromPolygonXY([points])
@@ -246,7 +259,7 @@ class Layer:
 
             # create layer feature
             feature = QgsFeature(fields)
-            feature.setAttributes([id, PaperScope.getShapeType(shape), height, 2])
+            feature.setAttributes([id, PaperScope.getShapeType(shape), height, umep_type])
             feature.setGeometry(polygon)
             writer.addFeature(feature)
 

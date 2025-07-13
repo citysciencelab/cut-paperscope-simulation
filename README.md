@@ -47,7 +47,7 @@ First build a Docker image from the project that can be used to run the simulati
 1. Navigate to the root directory of the project where the Dockerfile is located.
 2. Build the Docker image using the following command:
     ```
-    docker build -t paperscope-simulation:latest .
+    docker build --no-cache -t paperscope-simulation:latest .
     ```
 
 
@@ -60,5 +60,5 @@ docker run -v /my-local-storage/simulations:/app/storage paperscope-simulation:l
 
 All simulations are managed by the PaperScope WebInterface, which implements an OGC API endpoint to interact with simulations (processes) and jobs. Because simulations are long-running tasks, it is important to have a queue with a high timeout (minimum 1 hour). Ensure that the queue in the WebInterface is started as follows:
 ```
-php artisan queue:listen --timeout=3600
+php artisan queue:listen --timeout=10800
 ```
